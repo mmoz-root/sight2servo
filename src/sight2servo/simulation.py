@@ -15,6 +15,17 @@ model = mujoco.MjModel.from_xml_path(
 
 data = mujoco.MjData(model)
 
+mujoco.mj_forward(model, data)
+
+end_effector_world_m = data.site(
+    "end_effector"
+).xpos
+
+print(
+    f"End-effector world position: "
+    f"{end_effector_world_m}"
+)
+
 print(f"Joints: {model.njnt}")
 print(f"Actuators: {model.nu}")
 print(f"qpos: {data.qpos}")

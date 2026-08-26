@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import mujoco
+from sight2servo.kinematics import forward_kinematics
 
 
 MODEL_PATH = (
