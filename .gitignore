@@ -3,3 +3,8 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .DS_Store
+
+# Local project reference documents
+CODEX_SYSTEM_PROMPT.md
+SIGHT2SERVO_MILESTONES.md
+SIGHT2SERVO_PROJECT_SPEC.md

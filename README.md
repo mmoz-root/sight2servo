@@ -7,7 +7,7 @@ each step.
 
 ## Current status
 
-Milestones 0-3 are complete.
+Milestones 0-5 are complete.
 
 Milestone 0 - MuJoCo model:
 
@@ -33,13 +33,26 @@ Milestone 3 - Feedback control:
 - Two-joint control with dynamic coupling
 - IK-driven PD control reaching a Cartesian target within 1 mm
 
-The test suite currently contains 22 passing tests.
+Milestone 4 - Camera rendering:
 
-Not implemented yet:
+- Reusable RGB rendering from the fixed MuJoCo overhead camera
+- 640 x 480 frame extraction and saved-image verification
+- Camera smoke test for frame shape, type, and content
 
-- Camera image rendering and red-target detection
+Milestone 5 - Red-target detection:
+
+- HSV color segmentation with both OpenCV red hue ranges
+- Largest-contour centroid detection returning `(u, v)` or `None`
+- Synthetic-image tests and MuJoCo camera integration test
+- Saved detection image with the measured centroid marked
+
+The test suite currently contains 27 passing tests.
+
+Next milestones:
+
 - Pixel-to-world coordinate mapping
 - Closed vision-guided control loop
+- Controlled experiments and final documentation
 
 ## Setup
 
@@ -59,6 +72,18 @@ Run the IK-driven PD control demo:
 
 ```bash
 PYTHONPATH=src uv run python -m sight2servo.ik_pd_demo
+```
+
+Render and save an overhead camera frame:
+
+```bash
+PYTHONPATH=src uv run python -m sight2servo.camera_demo
+```
+
+Detect and mark the red target in a camera frame:
+
+```bash
+PYTHONPATH=src uv run python -m sight2servo.vision_demo
 ```
 
 Open the MuJoCo viewer:
