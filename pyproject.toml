@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A learning-first vision-guided robotic arm in MuJoCo"
 requires-python = ">=3.11"
 dependencies = [
+    "matplotlib>=3.11.1",
     "mujoco==3.3.7",
     "numpy>=2.4.6",
     "opencv-python>=5.0.0.93",
