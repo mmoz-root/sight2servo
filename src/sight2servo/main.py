@@ -1,11 +1,9 @@
 from pathlib import Path
+from math import hypot
+import time
 
 import mujoco
 import mujoco.viewer
-
-import time
-
-from math import hypot
 
 from sight2servo.control import (
     limit_torque,
@@ -82,7 +80,8 @@ def main() -> None:
                         0.16,
                         -0.18,
                     )
-                mujoco.mj_forward(model, data)
+                    mujoco.mj_forward(model, data)
+
                 if step % perception_interval_steps == 0:
                     frame_rgb = render_rgb_frame(
                         renderer,
@@ -174,5 +173,7 @@ def main() -> None:
         f"Camera-target error: "
         f"{position_error_m * 1000:.3f} mm"
     )
+
+
 if __name__ == "__main__":
     main()
