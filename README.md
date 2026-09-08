@@ -27,11 +27,12 @@ flowchart LR
 ```
 
 The controller never reads the target's true simulator position. Ground truth
-is used only after a run to evaluate positioning error.
+is used to place the target in the environment and to evaluate positioning or
+tracking error; it is not an input to the robot's decision pipeline.
 
 ## Status
 
-The technical implementation and the two required experiments are complete:
+The technical implementation and four experiments are complete:
 
 - Two-link planar arm, torque actuators, target, and fixed overhead camera
 - Manual forward kinematics verified against MuJoCo
@@ -43,6 +44,8 @@ The technical implementation and the two required experiments are complete:
 - Repeated camera-to-control loop with a moving target
 - P-versus-PD controller experiment
 - Perception-noise experiment with 20 trials per noise level
+- Control-frequency experiment across six rates and three joint targets
+- Perception-latency experiment across six delays on a moving-target trajectory
 - Automated tests for model, kinematics, control, vision, and transforms
 
 ## Demo
@@ -96,6 +99,22 @@ PYTHONPATH=src uv run python experiments/perception_noise.py
 The noise experiment performs 80 offscreen simulation runs and therefore
 takes longer than the controller comparison.
 
+Control-frequency experiment (18 configurations):
+
+```bash
+PYTHONPATH=src uv run python experiments/control_frequency.py
+```
+
+Perception-latency experiment (six delay conditions plus a zero-delay diagnostic):
+
+```bash
+PYTHONPATH=src uv run python experiments/perception_latency.py
+```
+
+The frequency experiment saves summary metrics and one plot per target. The
+latency experiment saves summary metrics, full error histories, and a plot.
+CSV outputs are in `assets/results/`; plots are in `assets/plots/`.
+
 ## Results
 
 ### P versus PD control
@@ -126,10 +145,43 @@ velocity. See the full
 
 ![Perception-noise results](assets/plots/perception_noise.png)
 
-Noise did not monotonically increase mean final error because random offsets
-sometimes counteracted the existing self-occlusion bias. It did consistently
-increase trial-to-trial variability, making the outcome less predictable. See
+Noise did not monotonically increase mean final error. Interaction with
+self-occlusion is a possible explanation, but was not independently verified.
+Noise did consistently increase trial-to-trial variability in these runs. See
 the full [perception-noise report](experiments/perception_noise.md).
+
+### Control frequency
+
+PD updates were varied from 10 to 500 Hz while physics stayed at 500 Hz, with
+the same gains and torque limits. Across all three tested joint targets,
+10 and 25 Hz did not settle within eight seconds; 50 through 500 Hz settled.
+Differences among the higher rates were smaller and depended on the metric
+and target. These results do not establish a universal minimum update rate.
+
+See the [control-frequency report](experiments/control_frequency.md) for
+all 18 configurations, metric definitions, plots, and CSV results.
+
+### Perception latency
+
+Camera-derived target estimates were delayed by 0, 10, 20, 50, 100, or 200 ms
+while camera sampling stayed at 25 Hz and PD control at 500 Hz. The cube
+followed the same eight-second out-and-back path after a four-second warmup.
+
+| Added latency (ms) | Tracking RMSE (mm) | Peak error (mm) | Final error (mm) |
+|---:|---:|---:|---:|
+| 0 | 15.601 | 22.471 | 14.673 |
+| 10 | 15.400 | 21.427 | 16.745 |
+| 20 | 15.261 | 22.744 | 17.096 |
+| 50 | 14.473 | 23.677 | 15.628 |
+| 100 | 14.655 | 25.287 | 15.927 |
+| 200 | 14.401 | 31.877 | 3.803 |
+
+The 200 ms condition increased peak error by approximately 41.9% relative to
+zero delay, but did not increase whole-window RMSE. Effects were not uniformly
+monotonic. Self-occlusion remained part of the vision loop.
+
+See the [perception-latency report](experiments/perception_latency.md) for the
+delay model, plot, saved error histories, and limitations.
 
 ## Component demos
 
@@ -183,14 +235,16 @@ macOS graphics context.
   causing closed-loop oscillation.
 - The controller always selects the first valid IK solution rather than
   optimizing configuration continuity or obstacle avoidance.
-- The experiments measure final error rather than error over the full
-  trajectory.
+- The noise experiment measures final error only; the frequency and latency
+  experiments also measure error across their observation windows.
+- Frequency results cover three joint targets; latency results cover one
+  moving-target trajectory with fixed simulated delay and existing self-occlusion.
 
 ## Future work
 
 - Handle occlusion using target tracking, filtering, or a second camera
 - Calibrate the camera from observations instead of fixed model parameters
-- Measure trajectory-wide tracking error and perception latency
+- Extend latency measurements to more trajectories, speeds, and variable delays
 - Select IK solutions based on current joint configuration
 - Extend the arm and perception pipeline to 3D
 - Transfer the pipeline to a physical robot
